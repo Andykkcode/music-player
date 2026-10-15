@@ -1,0 +1,502 @@
+/* ============================================================
+   Music Player - style.css
+   职责：负责页面长什么样（颜色、大小、位置），不管功能逻辑
+   ============================================================
+
+   【当前状态：P3-⑤ - 黑胶标签显示歌名】
+   相比 P3-④ 新增：
+   1. 黑胶唱片中心的标签改为显示"当前播放的歌名"
+   2. 歌名字号自适应：歌名越长字越小，保证不溢出圆形标签
+   */
+
+/* 把浏览器的默认边距清掉，让背景铺满整个窗口 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* body：页面根元素。背景改成"老唱片店"的暖暗色调：
+   顶部一团暗红棕色的氛围光 + 深色木质渐变，配合黑胶主题。 */
+body {
+  background:
+    radial-gradient(circle at 50% 15%, #45291a 0%, transparent 55%), /* 顶部暖光 */
+    linear-gradient(160deg, #241308 0%, #170c05 55%, #0f0803 100%);
+  min-height: 100vh;            /* 至少占满一整个屏幕高度 */
+  display: flex;                /* 开启弹性布局，用来居中卡片 */
+  align-items: center;          /* 垂直方向居中 */
+  justify-content: center;      /* 水平方向居中 */
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif; /* 中英文字体 */
+}
+
+/* .player：中间的卡片容器——现在是"唱机机身"的感觉：
+   深棕底色 + 暗金描边，顶部一条微光像机身的金属包边 */
+.player {
+  width: 380px;                 /* 比原来稍宽，好放下唱片机 */
+  padding: 34px 30px 40px;
+  background: linear-gradient(180deg, rgba(63, 40, 22, 0.92) 0%, rgba(38, 22, 11, 0.94) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.28);   /* 暗金边框 */
+  border-radius: 22px;
+  text-align: center;
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 224, 160, 0.1);     /* 顶部一道微光 */
+}
+
+/* ============================================================
+   P3-② 新增：黑胶唱片机
+   ============================================================ */
+
+/* .turntable：唱机台面。一个圆形底座（深色转盘托盘），
+   黑胶唱片躺在上面，唱臂从右上角伸过来。
+   ::before 画的就是那个圆形托盘。 */
+.turntable {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 6px auto 22px;        /* 居中，和下方标题留出距离 */
+}
+
+.turntable::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #37200f 0%, #1c0f06 65%, #120a04 100%);
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.7),          /* 托盘投在机身上的影子 */
+    inset 0 3px 12px rgba(0, 0, 0, 0.85),    /* 托盘内侧阴影 */
+    inset 0 -2px 0 rgba(212, 175, 55, 0.15); /* 托盘边缘一圈暗金色 */
+}
+
+/* .vinyl：黑胶唱片本体（深棕做旧盘面）。
+   做旧质感全靠 4 层 background 叠加（从外到内）：
+   ① conic-gradient：一圈"扇形的划痕"，像用旧了的盘面
+   ② radial-gradient：顶部一处暖色反光，模拟旧漆面的光泽
+   ③ repeating-radial-gradient：放射状细纹，模拟唱片的沟槽
+   ④ radial-gradient：深棕色从中心到边缘渐变 */
+.vinyl {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 25deg,
+      rgba(255, 255, 255, 0.06) 0deg, transparent 7deg,
+      rgba(255, 255, 255, 0.03) 18deg, transparent 26deg,
+      rgba(255, 255, 255, 0.05) 40deg, transparent 52deg,
+      rgba(255, 255, 255, 0.03) 66deg, transparent 78deg,
+      rgba(255, 255, 255, 0.05) 95deg, transparent 115deg),
+    radial-gradient(circle at 32% 28%, rgba(255, 214, 160, 0.14) 0%, transparent 42%),
+    repeating-radial-gradient(circle at center,
+      rgba(0, 0, 0, 0.35) 0px, rgba(0, 0, 0, 0.35) 1px, transparent 1px, transparent 5px),
+    radial-gradient(circle at center, #5d3a22 0%, #41250f 45%, #241106 75%, #150a03 100%);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.6),
+    inset 0 0 22px rgba(0, 0, 0, 0.65);      /* 盘面边缘的暗角 */
+  z-index: 1;
+}
+
+/* 播放时：JS 给 .vinyl 加上 .spinning，唱片开始匀速旋转。
+   转一圈 1.6 秒——真实黑胶是 33⅓ 转/分太慢没感觉，
+   这里加快一点，更有"正在放歌"的动感。 */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.vinyl.spinning {
+  animation: spin 1.6s linear infinite;
+}
+
+/* .vinyl-label：唱片中心的标签（金黑配色）。
+   金色渐变圆纸 + 黑色细环 + 中心孔，复古唱片公司风格。 */
+.vinyl-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f7e2a4 0%, #d4af37 52%, #8a6b1d 100%);
+  border: 1px solid rgba(26, 14, 4, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #241206;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+/* 标签上的大字：VINYL（衬线字体更有老唱片味道） */
+.label-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* 标签中间的歌名（P3-⑤ 新增）：显示当前播放的歌名。
+   字号由 JS 的 fitLabelText() 动态调整（歌名越长字越小），
+   这里只负责"单行、居中、超长省略号"这些固定样式。 */
+.label-song {
+  max-width: 66px;          /* 和 JS 里的 maxWidth 保持一致 */
+  font-size: 13px;          /* 初始最大字号，JS 会按需缩小 */
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap;      /* 不换行 */
+  overflow: hidden;         /* 超出部分藏起来 */
+  text-overflow: ellipsis;  /* 超出的部分显示成省略号 … */
+  text-align: center;
+}
+
+/* 中心孔：唱片中间那个小圆洞 */
+.vinyl-label::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #1a0f06;
+}
+
+/* 内圈细环：标签上印的装饰圈 */
+.vinyl-label::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(26, 14, 4, 0.35);
+  border-radius: 50%;
+}
+
+/* .tonearm：唱臂。
+   关键点：transform-origin 在右侧（底座），整条臂以底座为轴心转。
+   默认 rotate(30deg) = 抬起，唱头翘向右上方（像没在放歌的唱片机）；
+   JS 加 .playing 后 rotate(-12deg)，唱头垂下来搭在盘面上。 */
+.tonearm {
+  position: absolute;
+  top: 30px;
+  right: -6px;
+  width: 150px;
+  height: 12px;
+  background: linear-gradient(180deg, #cdac6f 0%, #8a6b3d 55%, #5f4522 100%);
+  border-radius: 999px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+  transform-origin: right center;            /* 以底座为轴心 */
+  transform: rotate(30deg);                  /* 默认抬起 */
+  transition: transform 0.8s cubic-bezier(0.34, 1.4, 0.5, 1); /* 落臂带一点回弹 */
+  z-index: 5;                                /* 唱臂要在唱片上面 */
+}
+
+/* 唱头：臂末端那个小疙瘩 */
+.tonearm::before {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #5a5a5a 0%, #262626 100%);
+  border-radius: 50% 50% 42% 42%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.55);
+}
+
+/* 底座：唱臂根部那颗金灿灿的轴承 */
+.tonearm::after {
+  content: '';
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f4dfa3 0%, #b8913a 55%, #6b4e1d 100%);
+  border: 2px solid #35240f;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.6);
+}
+
+/* 播放中：唱臂落下，搭到唱片上 */
+.tonearm.playing {
+  transform: rotate(-12deg);
+}
+
+/* ============================================================
+   原有界面（配色统一改成金色主题）
+   ============================================================ */
+
+/* .song-title：歌曲标题文字 */
+.song-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #f0e2c0;               /* 暖米白，在深棕背景上清晰可读 */
+  margin-bottom: 20px;
+  white-space: nowrap;          /* 标题不换行 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* .choose-btn：选择音乐文件的按钮（金色虚线边框） */
+.choose-btn {
+  width: 100%;
+  padding: 11px 0;
+  font-size: 14px;
+  color: #e8c96a;
+  background: transparent;
+  border: 1px dashed rgba(212, 175, 55, 0.55);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+/* 悬停：淡金色底 + 边框变实线 */
+.choose-btn:hover {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: #e8c96a;
+}
+
+/* .progress-wrap：进度条这一行（时间 + 滑块横着排） */
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+/* .time：进度条左右两边的"当前时间 / 总时长"文字 */
+.time {
+  font-size: 12px;
+  color: #a9926b;
+  min-width: 38px;
+}
+
+/* 所有 range 滑块（进度条 + 音量条）统一样式：滑轨 + 金色圆点 */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(240, 214, 160, 0.18);
+  outline: none;
+  cursor: pointer;
+}
+
+/* 滑块"圆点"（WebKit 内核） */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #d4af37;          /* 金色 */
+  border: 2px solid #fff4d6;    /* 米白描边 */
+}
+
+/* 滑块"圆点"（Firefox 内核） */
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #d4af37;
+  border: 2px solid #fff4d6;
+}
+
+/* 进度条滑块：占满中间剩余空间 */
+#progress {
+  flex: 1;
+}
+
+/* .play-btn：播放/暂停按钮（金色渐变，复古唱机的"启动键"） */
+.play-btn {
+  width: 90px;
+  height: 46px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2a1508;               /* 深棕字，压在金色上 */
+  background: linear-gradient(135deg, #eccf74 0%, #c99b3a 60%, #a97e28 100%);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.play-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 8px 22px rgba(212, 175, 55, 0.4);
+}
+
+/* 禁用状态：没选歌时是暗棕灰的 */
+.play-btn:disabled {
+  background: #4a3a28;
+  color: #8a7a60;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* .volume-wrap：音量这一行 */
+.volume-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.volume-label {
+  font-size: 13px;
+  color: #a9926b;
+}
+
+#volume {
+  flex: 1;
+}
+
+/* ============================================================
+   歌单（P2）+ 删歌按钮（P3-①）——配色换成暖金系
+   ============================================================ */
+
+/* .playlist：歌单列表容器。深棕底 + 暗金细边，像唱片机的说明书区 */
+.playlist {
+  list-style: none;
+  margin-top: 16px;
+  padding: 6px;
+  max-height: 190px;
+  overflow-y: auto;
+  background: rgba(10, 5, 2, 0.45);
+  border: 1px solid rgba(212, 175, 55, 0.12);
+  border-radius: 12px;
+}
+
+/* .playlist-item：歌单里的每一行 */
+.playlist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #d8c8a8;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.15s;
+}
+
+.playlist-item:hover {
+  background: rgba(240, 214, 160, 0.08);
+}
+
+/* 正在播放的那一行：金色高亮 */
+.playlist-item.active {
+  background: rgba(212, 175, 55, 0.26);
+  color: #fff0c8;
+}
+
+/* 行首序号 */
+.playlist-item .index {
+  min-width: 22px;
+  text-align: right;
+  font-size: 11px;
+  color: #8f7a55;
+}
+
+/* 歌名区域：flex: 1 占满剩余空间 */
+.playlist-item .song-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 删除按钮：保留红色（"删除"是危险操作，红色语义更明确） */
+.delete-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  font-size: 15px;
+  line-height: 1;
+  color: rgba(240, 214, 160, 0.4);
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.delete-btn:hover {
+  background: rgba(233, 69, 96, 0.85);
+  color: #fff;
+}
+
+/* .controls：播放控制区容器 */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* .ctrl-btn：上一首 / 下一首按钮 */
+.ctrl-btn {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #e8dcc0;
+  background: rgba(240, 214, 160, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.ctrl-btn:hover:not(:disabled) {
+  background: rgba(240, 214, 160, 0.16);
+  transform: scale(1.05);
+}
+
+.ctrl-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* .mode-btn：播放模式按钮（P3-④ 新增）。
+   小号胶囊按钮，金色描边，放在控制区下方单独一行。
+   点击切换模式时文字会变（↻ 顺序 / 🔂 单曲循环 / 🔀 随机）。 */
+.mode-btn {
+  margin-top: 14px;
+  padding: 6px 16px;
+  font-size: 12px;
+  color: #cbb279;
+  background: rgba(240, 214, 160, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.mode-btn:hover {
+  background: rgba(212, 175, 55, 0.16);
+  border-color: #e8c96a;
+  transform: scale(1.05);
+}
+
+/* 当前模式高亮：随机/单曲循环模式下按钮明显一点，
+   让人一眼看出"现在不是顺序播放" */
+.mode-btn.mode-active {
+  color: #fff0c8;
+  background: rgba(212, 175, 55, 0.22);
+  border-color: #d4af37;
+}
+
+/* 歌单滚动条美化：暗金色 */
+.playlist::-webkit-scrollbar {
+  width: 6px;
+}
+.playlist::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.25);
+  border-radius: 999px;
+}

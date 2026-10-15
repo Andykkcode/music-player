@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport 让页面在手机上也能正常缩放显示 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Player</title>
+  <!-- 内联 favicon（标签页小图标）：一个音乐符号 emoji，不占任何网络请求 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+  <!-- 引入样式文件（CSS 统一写在 style.css，方便维护） -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!--
+    播放器主界面
+    main.player：居中的卡片，负责把内容框在一个漂亮的容器里
+  -->
+  <main class="player">
+    <!--
+      黑胶唱片机区域（P3-② 新增）：
+      .turntable 是唱机台面（圆形托盘），上面躺着黑胶唱片（.vinyl）。
+      - .vinyl：深棕做旧盘面，中间是金黑配色的标签；播放时整体旋转
+      - .tonearm：唱臂，播放时从右上角垂下来"搭"在唱片上
+    -->
+    <div class="turntable">
+      <div class="vinyl" id="vinyl">
+        <div class="vinyl-label">
+          <span class="label-title">VINYL</span>
+          <!-- 标签中间的歌名：播放哪首就印哪首，字号自适应（P3-⑤ 新增） -->
+          <span class="label-song" id="label-song">♪ 复古唱片机</span>
+        </div>
+      </div>
+      <div class="tonearm" id="tonearm"></div>
+    </div>
+
+    <!-- 歌曲标题：选中文件后这里会变成歌名 -->
+    <h1 id="song-title" class="song-title">还没有选择歌曲</h1>
+
+    <!--
+      选择文件的入口：
+      multiple 是这次的新东西——加上它之后，文件选择框
+      允许一次选中多首歌（按住 Ctrl 点选，或者直接全选）。
+      没有 multiple 时，一次只能选一首。
+    -->
+    <input type="file" id="file-input" accept="audio/*" multiple hidden>
+    <button id="choose-btn" class="choose-btn" type="button">添加歌曲到歌单</button>
+
+    <!--
+      歌单列表：选中的歌曲会按顺序排队显示在这里。
+      <ul> 是无序列表，JS 会往里面动态塞 <li>（一行一首歌）。
+      现在是空的，等 JS 来填。
+    -->
+    <ul id="playlist" class="playlist"></ul>
+
+    <!--
+      进度条区域：左边当前时间，中间进度条，右边总时长
+      <input type="range"> 是浏览器的滑块控件，min=0 max=100，
+      我们约定进度条的值 = 播放进度百分比（0~100）。
+    -->
+    <div class="progress-wrap">
+      <span id="current-time" class="time">0:00</span>
+      <input type="range" id="progress" min="0" max="100" value="0" step="0.1">
+      <span id="total-time" class="time">0:00</span>
+    </div>
+
+    <!--
+      播放控制区：上一首 / 播放暂停 / 下一首
+      三个按钮用一个 .controls 容器包起来，方便 CSS 排成一行。
+      没选歌曲之前，三个按钮都是 disabled（灰色不可点）。
+    -->
+    <div class="controls">
+      <button id="prev-btn" class="ctrl-btn" type="button" disabled>⏮ 上一首</button>
+      <button id="play-btn" class="play-btn" type="button" disabled>播放</button>
+      <button id="next-btn" class="ctrl-btn" type="button" disabled>下一首 ⏭</button>
+    </div>
+
+    <!--
+      播放模式按钮（P3-④ 新增）：点击在"顺序 → 单曲循环 → 随机"之间切换。
+      默认是顺序播放（↻ 顺序），按钮文字和悬停提示会跟着模式变化。
+    -->
+    <button id="mode-btn" class="mode-btn" type="button" title="顺序播放：按列表顺序，播完最后一首停止">↻ 顺序</button>
+
+    <!--
+      音量控制：同样是一个滑块
+      min=0（静音） max=1（最大音量） step=0.01（每次微调 1%）
+      value=0.8 是初始音量 80%
+    -->
+    <div class="volume-wrap">
+      <span class="volume-label">音量</span>
+      <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8">
+    </div>
+  </main>
+
+  <!-- 引入脚本文件（所有 JS 逻辑统一写在 script.js） -->
+  <script src="script.js"></script>
+</body>
+</html>
